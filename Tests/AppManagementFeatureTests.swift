@@ -421,6 +421,67 @@ enum AppManagementFeatureTests {
                && UninstallerSupport.verifiedBundleID("com.vorssaint.utils") == nil
                && UninstallerSupport.verifiedBundleID("com.apple.system") == nil,
                "malformed, protected and current app identifiers never enter uninstall paths")
+        let selectionFixture = FileManager.default.temporaryDirectory
+            .appendingPathComponent("vorssaint-uninstaller-selection-\(UUID().uuidString)",
+                                    isDirectory: true)
+        try? FileManager.default.createDirectory(at: selectionFixture, withIntermediateDirectories: true)
+        func selectionBundle(_ name: String, bundleID: String) -> URL {
+            let app = selectionFixture.appendingPathComponent(name, isDirectory: true)
+            let info = app.appendingPathComponent("Contents/Info.plist")
+            try? FileManager.default.createDirectory(at: info.deletingLastPathComponent(),
+                                                     withIntermediateDirectories: true)
+            let plist: [String: Any] = ["CFBundleIdentifier": bundleID]
+            if let data = try? PropertyListSerialization.data(fromPropertyList: plist,
+                                                               format: .xml, options: 0) {
+                try? data.write(to: info)
+            }
+            return app
+        }
+        let editorApp = selectionBundle("Editor.app", bundleID: "com.vendor.editor")
+        suite.expect(UninstallerSupport.selection(for: URL(string: "https://example.com/App.app")!) == nil,
+               "a web address is refused before loading an app bundle")
+        let editorSelection = UninstallerSupport.selection(for: editorApp)
+        suite.expect(editorSelection?.bundleID == "com.vendor.editor"
+               && editorSelection?.url == editorApp.standardizedFileURL,
+               "a complete third party app bundle is accepted with its standardized path")
+        let appleEditorApp = selectionBundle("AppleEditor.app", bundleID: "com.apple.editor")
+        suite.expect(UninstallerSupport.selection(for: appleEditorApp) == nil,
+               "an Apple bundle identifier is refused before it can claim uninstall paths")
+        let aliasApp = selectionFixture.appendingPathComponent("Alias.app")
+        try? FileManager.default.createSymbolicLink(at: aliasApp, withDestinationURL: editorApp)
+        suite.expect(UninstallerSupport.selection(for: aliasApp) == nil,
+               "an app symlink is refused instead of selecting its destination")
+        let bareApp = selectionFixture.appendingPathComponent("Bare.app", isDirectory: true)
+        try? FileManager.default.createDirectory(at: bareApp, withIntermediateDirectories: true)
+        suite.expect(UninstallerSupport.selection(for: bareApp) == nil,
+               "a bundle without Info.plist is refused before a scan starts")
+        // An iPhone or iPad app on a Mac carries its Info.plist at the top of
+        // the bundle and has no Contents folder for the uninstaller to remove.
+        let wrappedApp = selectionFixture.appendingPathComponent("Wrapped.app", isDirectory: true)
+        try? FileManager.default.createDirectory(at: wrappedApp, withIntermediateDirectories: true)
+        if let data = try? PropertyListSerialization.data(
+            fromPropertyList: ["CFBundleIdentifier": "com.vendor.wrapped"], format: .xml, options: 0) {
+            try? data.write(to: wrappedApp.appendingPathComponent("Info.plist"))
+        }
+        suite.expect(Bundle(url: wrappedApp)?.bundleIdentifier == "com.vendor.wrapped"
+               && UninstallerSupport.selection(for: wrappedApp) == nil,
+               "a bundle with a valid identifier but no Contents/Info.plist is refused")
+        let listedApps = [editorApp, appleEditorApp, bareApp, wrappedApp].map {
+            InstalledApps.InstalledApp(id: $0.standardizedFileURL.path, name: $0.lastPathComponent,
+                                      bundleID: nil, url: $0, isSystem: false)
+        }
+        suite.expect(UninstallerSupport.acceptedApplicationIDs(listedApps)
+                == [editorApp.standardizedFileURL.path],
+               "the command bar's uninstall list keeps only the apps the uninstaller accepts")
+        try? FileManager.default.removeItem(at: selectionFixture)
+        for path in ["Sources/Vorssaint/UI/Uninstall/UninstallerView.swift",
+                     "Sources/Vorssaint/UI/MenuPanel/PanelUninstallerView.swift"] {
+            let pickerSource = (try? String(contentsOfFile: path, encoding: .utf8)) ?? ""
+            suite.expect(pickerSource.contains("UninstallerSupport.offeredApplications()"),
+                   "\(path) offers only the apps the shared selection checks accept")
+            suite.expect(pickerSource.contains("return uninstaller.select(appURL: app)"),
+                   "\(path) springs a refused drop back instead of accepting it")
+        }
         let uninstallAppURL = URL(fileURLWithPath: "/Applications/Editor.app")
         suite.expect(UninstallerSupport.isNestedBundle(
                    URL(fileURLWithPath: "/Applications/Editor.app/Contents/Library/LoginItems/Background.app"),
@@ -1112,6 +1173,23 @@ enum AppManagementFeatureTests {
         suite.expect(!AutoQuitSupport.hasDependentApplication(hostBundleIdentifier: "com.example.unrelated",
                                                         applicationBundleURLs: [dependentApp]),
                "AutoQuit does not protect an unrelated host")
+        func agentBundle(_ name: String, _ info: [String: Any]) -> URL {
+            let url = outerApp.deletingLastPathComponent().appendingPathComponent("\(name).app")
+            try? FileManager.default.createDirectory(at: url.appendingPathComponent("Contents"),
+                                                     withIntermediateDirectories: true)
+            NSDictionary(dictionary: info).write(to: url.appendingPathComponent("Contents/Info.plist"), atomically: true)
+            return url
+        }
+        suite.expect(AutoQuitSupport.isBackgroundApp(bundleURL: agentBundle("MenuBar", ["LSUIElement": true])),
+               "AutoQuit leaves a menu bar app running when its settings window closes")
+        suite.expect(AutoQuitSupport.isBackgroundApp(bundleURL: agentBundle("MenuBarString", ["LSUIElement": "1"])),
+               "AutoQuit reads a string LSUIElement the way Launch Services does")
+        suite.expect(AutoQuitSupport.isBackgroundApp(bundleURL: agentBundle("Daemon", ["LSBackgroundOnly": true])),
+               "AutoQuit leaves a background-only app running")
+        suite.expect(!AutoQuitSupport.isBackgroundApp(bundleURL: agentBundle("Regular", ["LSUIElement": false])),
+               "AutoQuit still quits a regular app when its last window closes")
+        suite.expect(!AutoQuitSupport.isBackgroundApp(bundleURL: nil),
+               "AutoQuit treats a process without a bundle as a regular app")
         try? FileManager.default.removeItem(at: outerApp.deletingLastPathComponent())
         suite.expect(!AutoQuitSupport.shouldScheduleWindowCheck(for: .appDeactivated,
                                                           hasRecentCloseRequest: false),

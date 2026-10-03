@@ -31,6 +31,8 @@ struct NotchEditorStrings {
     let privacy: String
     let reopening: String
     let lastPage: String
+    let openActivity: String
+    let openActivityHint: String
     let activationTime: String
     let activationTimeHint: String
     let activationTimeFormat: String
@@ -63,6 +65,7 @@ struct NotchEditorStrings {
     let downloadsSummary: String
     let scratchpadSummary: String
     let agentsSummary: String
+    let watchSummary: String
 
     func enableFeature(_ title: String) -> String { String(format: enableFeatureFormat, title) }
     func enableSetting(_ title: String) -> String { String(format: enableSettingFormat, title) }
@@ -86,6 +89,7 @@ struct NotchEditorStrings {
         case .downloads: return downloadsSummary
         case .scratchpad: return scratchpadSummary
         case .agents: return agentsSummary
+        case .watch: return watchSummary
         }
     }
 }
@@ -121,6 +125,8 @@ extension FeatureStrings {
             privacy: "Privacy",
             reopening: "When reopening",
             lastPage: "Last page",
+            openActivity: "Open the visible activity",
+            openActivityHint: "When the closed island shows music, a timer or another activity, it opens on that page instead.",
             activationTime: "Activation time",
             activationTimeHint: "Keep the pointer over the island for this long to open it.",
             activationTimeFormat: "%.2f s",
@@ -130,7 +136,7 @@ extension FeatureStrings {
             keyboardLightUnavailable: "Keyboard backlight control is unavailable on this Mac.",
             appPanelHint: "Choose where clicking the Vorssaint menu bar icon opens the app panel, on any display.",
             hideMenuBarIcon: "Hide the menu bar icon",
-            hideMenuBarIconHint: "Settings and the app panel open from Dynamic Island. The icon returns by itself when Dynamic Island is off and when there is something to signal (an update ready or the microphone muted).",
+            hideMenuBarIconHint: "Settings and the app panel open from Dynamic Island. The icon returns when the island is off or hidden in full screen, or when an update is ready or the microphone is muted.",
             sections: "Sections",
             sectionsHint: "Drag to reorder. Uncheck a section to hide it from the island.",
             preview: "Preview",
@@ -152,7 +158,8 @@ extension FeatureStrings {
             cameraSummary: "A mirror to check yourself before a call.",
             downloadsSummary: "Downloads in progress and just finished.",
             scratchpadSummary: "Quick notes that save by themselves.",
-            agentsSummary: "Claude Code and Codex usage, limits and costs."
+            agentsSummary: "Claude Code, Codex and OpenCode usage, limits and costs.",
+            watchSummary: "Any part of a window, read live, with an alert when it changes."
         )
         case .ptBR: return NotchEditorStrings(
             layout: "Layout",
@@ -182,6 +189,8 @@ extension FeatureStrings {
             privacy: "Privacidade",
             reopening: "Ao reabrir",
             lastPage: "Última página",
+            openActivity: "Abrir a atividade visível",
+            openActivityHint: "Quando a ilha fechada mostra música, um temporizador ou outra atividade, ela abre na página dessa atividade.",
             activationTime: "Tempo de ativação",
             activationTimeHint: "Mantenha o ponteiro sobre a ilha por esse tempo para abrir.",
             activationTimeFormat: "%.2f s",
@@ -191,7 +200,7 @@ extension FeatureStrings {
             keyboardLightUnavailable: "O controle da luz do teclado não está disponível neste Mac.",
             appPanelHint: "Escolha onde o painel abre ao clicar no ícone do Vorssaint na barra de menus, em qualquer tela.",
             hideMenuBarIcon: "Ocultar o ícone da barra de menus",
-            hideMenuBarIconHint: "Os Ajustes e o painel do app abrem pela Dynamic Island. O ícone volta sozinho quando a Dynamic Island é desligada e quando há algo a avisar (atualização pronta ou microfone silenciado).",
+            hideMenuBarIconHint: "Os Ajustes e o painel do app abrem pela Dynamic Island. O ícone volta quando a ilha está desligada ou oculta em tela cheia, ou quando há atualização pronta ou microfone silenciado.",
             sections: "Seções",
             sectionsHint: "Arraste para reordenar. Desmarque uma seção para ocultá-la da ilha.",
             preview: "Prévia",
@@ -213,7 +222,8 @@ extension FeatureStrings {
             cameraSummary: "Um espelho para se ver antes de uma chamada.",
             downloadsSummary: "Downloads em andamento e os que acabaram de terminar.",
             scratchpadSummary: "Anotações rápidas que se salvam sozinhas.",
-            agentsSummary: "Uso, limites e custos do Claude Code e do Codex."
+            agentsSummary: "Uso, limites e custos do Claude Code, do Codex e do OpenCode.",
+            watchSummary: "Qualquer parte de uma janela, lida ao vivo, com aviso quando mudar."
         )
         case .es: return NotchEditorStrings(
             layout: "Diseño",
@@ -243,6 +253,8 @@ extension FeatureStrings {
             privacy: "Privacidad",
             reopening: "Al reabrir",
             lastPage: "Última página",
+            openActivity: "Abrir la actividad visible",
+            openActivityHint: "Cuando la isla cerrada muestra música, un temporizador u otra actividad, se abre en la página de esa actividad.",
             activationTime: "Tiempo de activación",
             activationTimeHint: "Mantén el puntero sobre la isla durante este tiempo para abrirla.",
             activationTimeFormat: "%.2f s",
@@ -252,7 +264,7 @@ extension FeatureStrings {
             keyboardLightUnavailable: "El control de la luz del teclado no está disponible en este Mac.",
             appPanelHint: "Elige dónde se abre el panel al pulsar el icono de Vorssaint en la barra de menús, en cualquier pantalla.",
             hideMenuBarIcon: "Ocultar el icono de la barra de menús",
-            hideMenuBarIconHint: "Los Ajustes y el panel de la app se abren desde Dynamic Island. El icono vuelve solo cuando desactivas Dynamic Island y cuando hay algo que avisar (una actualización lista o el micrófono silenciado).",
+            hideMenuBarIconHint: "Los Ajustes y el panel de la app se abren desde Dynamic Island. El icono vuelve cuando la isla está desactivada u oculta en pantalla completa, o cuando hay una actualización lista o el micrófono está silenciado.",
             sections: "Secciones",
             sectionsHint: "Arrastra para ordenar. Desmarca una sección para ocultarla de la isla.",
             preview: "Vista previa",
@@ -274,7 +286,8 @@ extension FeatureStrings {
             cameraSummary: "Un espejo para verte antes de una llamada.",
             downloadsSummary: "Descargas en curso y las recién terminadas.",
             scratchpadSummary: "Notas rápidas que se guardan solas.",
-            agentsSummary: "Uso, límites y costes de Claude Code y Codex."
+            agentsSummary: "Uso, límites y costes de Claude Code, Codex y OpenCode.",
+            watchSummary: "Cualquier parte de una ventana, leída en directo, con aviso cuando cambie."
         )
         case .sk: return NotchEditorStrings(
             layout: "Rozloženie",
@@ -304,6 +317,8 @@ extension FeatureStrings {
             privacy: "Súkromie",
             reopening: "Pri opätovnom otvorení",
             lastPage: "Posledná stránka",
+            openActivity: "Otvoriť zobrazenú aktivitu",
+            openActivityHint: "Keď zatvorený Dynamic Island zobrazuje hudbu, časovač alebo inú aktivitu, otvorí sa na stránke tejto aktivity.",
             activationTime: "Čas aktivácie",
             activationTimeHint: "Podržte kurzor nad Dynamic Island takto dlho, aby sa otvoril.",
             activationTimeFormat: "%.2f s",
@@ -313,7 +328,7 @@ extension FeatureStrings {
             keyboardLightUnavailable: "Ovládanie podsvietenia klávesnice nie je na tomto Macu k dispozícii.",
             appPanelHint: "Vyberte, kde sa otvorí panel aplikácie po kliknutí na ikonu Vorssaint v lište, na ktoromkoľvek displeji.",
             hideMenuBarIcon: "Skryť ikonu v lište",
-            hideMenuBarIconHint: "Nastavenia a panel aplikácie sa otvárajú z Dynamic Island. Ikona sa vráti sama, keď je Dynamic Island vypnutý a keď treba niečo signalizovať (pripravenú aktualizáciu alebo stlmený mikrofón).",
+            hideMenuBarIconHint: "Nastavenia a panel aplikácie sa otvárajú z Dynamic Island. Ikona sa vráti, keď je Dynamic Island vypnutý alebo skrytý v režime celej obrazovky, alebo keď je pripravená aktualizácia či stlmený mikrofón.",
             sections: "Sekcie",
             sectionsHint: "Presunutím zmeníte poradie. Zrušením fajky sekciu skryjete z Dynamic Island.",
             preview: "Náhľad",
@@ -335,7 +350,8 @@ extension FeatureStrings {
             cameraSummary: "Zrkadlo, v ktorom sa pred hovorom skontrolujete.",
             downloadsSummary: "Prebiehajúce a práve dokončené sťahovania.",
             scratchpadSummary: "Rýchle poznámky, ktoré sa ukladajú samy.",
-            agentsSummary: "Využitie, limity a náklady Claude Code a Codexu."
+            agentsSummary: "Využitie, limity a náklady Claude Code, Codexu a OpenCode.",
+            watchSummary: "Ľubovoľná časť okna čítaná naživo s upozornením, keď sa zmení."
         )
         case .de: return NotchEditorStrings(
             layout: "Layout",
@@ -365,6 +381,8 @@ extension FeatureStrings {
             privacy: "Datenschutz",
             reopening: "Beim erneuten Öffnen",
             lastPage: "Letzte Seite",
+            openActivity: "Sichtbare Aktivität öffnen",
+            openActivityHint: "Zeigt die geschlossene Insel Musik, einen Timer oder eine andere Aktivität, öffnet sie sich stattdessen auf der Seite dieser Aktivität.",
             activationTime: "Aktivierungszeit",
             activationTimeHint: "Halte den Zeiger so lange über der Insel, um sie zu öffnen.",
             activationTimeFormat: "%.2f s",
@@ -374,7 +392,7 @@ extension FeatureStrings {
             keyboardLightUnavailable: "Die Tastaturbeleuchtung lässt sich auf diesem Mac nicht steuern.",
             appPanelHint: "Wähle, wo ein Klick auf das Vorssaint-Menüleistensymbol das App-Panel öffnet, auf jedem Bildschirm.",
             hideMenuBarIcon: "Menüleistensymbol ausblenden",
-            hideMenuBarIconHint: "Einstellungen und das App-Panel öffnen sich über die Dynamic Island. Das Symbol kehrt von selbst zurück, wenn die Dynamic Island ausgeschaltet ist und wenn es etwas zu melden gibt (ein Update bereit oder das Mikrofon stumm).",
+            hideMenuBarIconHint: "Einstellungen und das App-Panel öffnen sich über die Dynamic Island. Das Symbol kehrt zurück, wenn Dynamic Island ausgeschaltet oder im Vollbild ausgeblendet ist, oder wenn ein Update bereitsteht oder das Mikrofon stummgeschaltet ist.",
             sections: "Bereiche",
             sectionsHint: "Zum Sortieren ziehen. Entferne das Häkchen, um einen Bereich auf der Insel auszublenden.",
             preview: "Vorschau",
@@ -396,7 +414,8 @@ extension FeatureStrings {
             cameraSummary: "Ein Spiegel, um dich vor einem Anruf zu sehen.",
             downloadsSummary: "Laufende und gerade fertige Downloads.",
             scratchpadSummary: "Schnelle Notizen, die sich selbst sichern.",
-            agentsSummary: "Nutzung, Limits und Kosten von Claude Code und Codex."
+            agentsSummary: "Nutzung, Limits und Kosten von Claude Code, Codex und OpenCode.",
+            watchSummary: "Ein beliebiger Teil eines Fensters, live gelesen, mit Hinweis bei Änderungen."
         )
         case .fr: return NotchEditorStrings(
             layout: "Disposition",
@@ -426,6 +445,8 @@ extension FeatureStrings {
             privacy: "Confidentialité",
             reopening: "À la réouverture",
             lastPage: "Dernière page",
+            openActivity: "Ouvrir l’activité visible",
+            openActivityHint: "Quand l’île fermée affiche de la musique, un minuteur ou une autre activité, elle s’ouvre plutôt sur la page de cette activité.",
             activationTime: "Délai d’activation",
             activationTimeHint: "Laissez le pointeur sur l’île pendant cette durée pour l’ouvrir.",
             activationTimeFormat: "%.2f s",
@@ -435,7 +456,7 @@ extension FeatureStrings {
             keyboardLightUnavailable: "Le contrôle du rétroéclairage du clavier est indisponible sur ce Mac.",
             appPanelHint: "Choisissez où un clic sur l’icône Vorssaint de la barre des menus ouvre le panneau, sur tout écran.",
             hideMenuBarIcon: "Masquer l’icône de la barre des menus",
-            hideMenuBarIconHint: "Les Réglages et le panneau de l’app s’ouvrent depuis Dynamic Island. L’icône revient d’elle-même quand vous désactivez Dynamic Island et quand il y a quelque chose à signaler (une mise à jour prête ou le micro coupé).",
+            hideMenuBarIconHint: "Les Réglages et le panneau de l’app s’ouvrent depuis Dynamic Island. L’icône revient quand Dynamic Island est désactivée ou masquée en plein écran, ou quand une mise à jour est prête ou que le micro est coupé.",
             sections: "Sections",
             sectionsHint: "Glissez pour réordonner. Décochez une section pour la masquer de l’îlot.",
             preview: "Aperçu",
@@ -457,7 +478,8 @@ extension FeatureStrings {
             cameraSummary: "Un miroir pour vous voir avant un appel.",
             downloadsSummary: "Les téléchargements en cours et ceux qui viennent de finir.",
             scratchpadSummary: "Des notes rapides qui s’enregistrent seules.",
-            agentsSummary: "Utilisation, limites et coûts de Claude Code et Codex."
+            agentsSummary: "Utilisation, limites et coûts de Claude Code, Codex et OpenCode.",
+            watchSummary: "N’importe quelle partie d’une fenêtre, lue en direct, avec une alerte quand elle change."
         )
         case .it: return NotchEditorStrings(
             layout: "Layout",
@@ -487,6 +509,8 @@ extension FeatureStrings {
             privacy: "Privacy",
             reopening: "Alla riapertura",
             lastPage: "Ultima pagina",
+            openActivity: "Apri l’attività visibile",
+            openActivityHint: "Quando l’isola chiusa mostra musica, un timer o un’altra attività, si apre invece sulla pagina di quell’attività.",
             activationTime: "Tempo di attivazione",
             activationTimeHint: "Mantieni il puntatore sull’isola per questo tempo per aprirla.",
             activationTimeFormat: "%.2f s",
@@ -496,7 +520,7 @@ extension FeatureStrings {
             keyboardLightUnavailable: "Il controllo della retroilluminazione della tastiera non è disponibile su questo Mac.",
             appPanelHint: "Scegli dove si apre il pannello facendo clic sull’icona di Vorssaint nella barra dei menu, su qualsiasi schermo.",
             hideMenuBarIcon: "Nascondi l’icona nella barra dei menu",
-            hideMenuBarIconHint: "Le Impostazioni e il pannello dell’app si aprono da Dynamic Island. L’icona torna da sola quando disattivi Dynamic Island e quando c’è qualcosa da segnalare (un aggiornamento pronto o il microfono silenziato).",
+            hideMenuBarIconHint: "Le Impostazioni e il pannello dell’app si aprono da Dynamic Island. L’icona torna quando Dynamic Island è disattivata o nascosta a schermo intero, oppure quando è pronto un aggiornamento o il microfono è silenziato.",
             sections: "Sezioni",
             sectionsHint: "Trascina per riordinare. Deseleziona una sezione per nasconderla dall’isola.",
             preview: "Anteprima",
@@ -518,7 +542,8 @@ extension FeatureStrings {
             cameraSummary: "Uno specchio per guardarti prima di una chiamata.",
             downloadsSummary: "Download in corso e appena completati.",
             scratchpadSummary: "Note veloci che si salvano da sole.",
-            agentsSummary: "Uso, limiti e costi di Claude Code e Codex."
+            agentsSummary: "Uso, limiti e costi di Claude Code, Codex e OpenCode.",
+            watchSummary: "Qualsiasi parte di una finestra, letta dal vivo, con un avviso quando cambia."
         )
         case .ru: return NotchEditorStrings(
             layout: "Макет",
@@ -548,6 +573,8 @@ extension FeatureStrings {
             privacy: "Конфиденциальность",
             reopening: "При повторном открытии",
             lastPage: "Последняя страница",
+            openActivity: "Открывать видимую активность",
+            openActivityHint: "Когда закрытый остров показывает музыку, таймер или другую активность, он открывается на странице этой активности.",
             activationTime: "Время активации",
             activationTimeHint: "Удерживайте указатель над островом в течение этого времени, чтобы открыть его.",
             activationTimeFormat: "%.2f с",
@@ -557,7 +584,7 @@ extension FeatureStrings {
             keyboardLightUnavailable: "Управление подсветкой клавиатуры недоступно на этом Mac.",
             appPanelHint: "Выберите, где открывать панель при нажатии значка Vorssaint в строке меню на любом экране.",
             hideMenuBarIcon: "Скрывать значок в строке меню",
-            hideMenuBarIconHint: "Настройки и панель приложения открываются из Dynamic Island. Значок возвращается сам, когда Dynamic Island выключена, а также когда есть что сообщить (готово обновление или выключен микрофон).",
+            hideMenuBarIconHint: "Настройки и панель приложения открываются из Dynamic Island. Значок возвращается, когда Dynamic Island выключена или скрыта в полноэкранном режиме, а также когда готово обновление или выключен микрофон.",
             sections: "Разделы",
             sectionsHint: "Перетащите для сортировки. Снимите флажок, чтобы скрыть раздел с острова.",
             preview: "Предпросмотр",
@@ -579,7 +606,8 @@ extension FeatureStrings {
             cameraSummary: "Зеркало, чтобы посмотреть на себя перед звонком.",
             downloadsSummary: "Текущие и только что завершённые загрузки.",
             scratchpadSummary: "Быстрые заметки, которые сохраняются сами.",
-            agentsSummary: "Использование, лимиты и стоимость Claude Code и Codex."
+            agentsSummary: "Использование, лимиты и стоимость Claude Code, Codex и OpenCode.",
+            watchSummary: "Любая часть окна, читаемая вживую, с оповещением об изменениях."
         )
         case .tr: return NotchEditorStrings(
             layout: "Yerleşim",
@@ -609,6 +637,8 @@ extension FeatureStrings {
             privacy: "Gizlilik",
             reopening: "Yeniden açıldığında",
             lastPage: "Son sayfa",
+            openActivity: "Görünen etkinliği aç",
+            openActivityHint: "Kapalı ada müzik, zamanlayıcı veya başka bir etkinlik gösterdiğinde bunun yerine o etkinliğin sayfasında açılır.",
             activationTime: "Etkinleştirme süresi",
             activationTimeHint: "Açmak için imleci bu süre boyunca adanın üzerinde tutun.",
             activationTimeFormat: "%.2f sn",
@@ -618,7 +648,7 @@ extension FeatureStrings {
             keyboardLightUnavailable: "Bu Mac’te klavye aydınlatması denetimi kullanılamıyor.",
             appPanelHint: "Herhangi bir ekranda menü çubuğundaki Vorssaint simgesine tıklanınca panelin nerede açılacağını seçin.",
             hideMenuBarIcon: "Menü çubuğu simgesini gizle",
-            hideMenuBarIconHint: "Ayarlar ve uygulama paneli Dynamic Island’dan açılır. Dynamic Island kapatıldığında ve bildirilecek bir şey olduğunda (güncelleme hazır veya mikrofon sessizde) simge kendiliğinden geri döner.",
+            hideMenuBarIconHint: "Ayarlar ve uygulama paneli Dynamic Island’dan açılır. Dynamic Island kapatıldığında veya tam ekranda gizlendiğinde ya da bir güncelleme hazır olduğunda veya mikrofon sessize alındığında simge geri döner.",
             sections: "Bölümler",
             sectionsHint: "Sıralamak için sürükleyin. Bir bölümü adada gizlemek için işaretini kaldırın.",
             preview: "Önizleme",
@@ -640,7 +670,8 @@ extension FeatureStrings {
             cameraSummary: "Aramadan önce kendinize bakmak için bir ayna.",
             downloadsSummary: "Süren ve yeni biten indirmeler.",
             scratchpadSummary: "Kendi kendine kaydedilen hızlı notlar.",
-            agentsSummary: "Claude Code ve Codex kullanımı, sınırları ve maliyetleri."
+            agentsSummary: "Claude Code, Codex ve OpenCode kullanımı, sınırları ve maliyetleri.",
+            watchSummary: "Bir pencerenin herhangi bir bölümü, canlı okunur ve değişince haber verilir."
         )
         case .ja: return NotchEditorStrings(
             layout: "レイアウト",
@@ -670,6 +701,8 @@ extension FeatureStrings {
             privacy: "プライバシー",
             reopening: "開き直したとき",
             lastPage: "前回のページ",
+            openActivity: "表示中のアクティビティを開く",
+            openActivityHint: "閉じた島にミュージックやタイマーなどのアクティビティが表示されているときは、代わりにそのページで開きます。",
             activationTime: "開くまでの時間",
             activationTimeHint: "島の上にポインタをこの時間置くと開きます。",
             activationTimeFormat: "%.2f 秒",
@@ -679,7 +712,7 @@ extension FeatureStrings {
             keyboardLightUnavailable: "このMacではキーボードのバックライトを制御できません。",
             appPanelHint: "どの画面でも、メニューバーのVorssaintアイコンをクリックしたときにパネルを開く場所を選択します。",
             hideMenuBarIcon: "メニューバーのアイコンを隠す",
-            hideMenuBarIconHint: "設定とアプリのパネルはDynamic Islandから開けます。Dynamic Islandをオフにしたときや、知らせることがあるとき（アップデートの準備完了やマイクの消音）は、アイコンが自動的に戻ります。",
+            hideMenuBarIconHint: "設定とアプリのパネルはDynamic Islandから開けます。Dynamic Islandがオフかフルスクリーンで非表示のとき、またはアップデートの準備ができたときやマイクを消音したときは、アイコンが戻ります。",
             sections: "セクション",
             sectionsHint: "ドラッグして並べ替えます。チェックを外したセクションは島に表示されません。",
             preview: "プレビュー",
@@ -701,7 +734,8 @@ extension FeatureStrings {
             cameraSummary: "通話前に身だしなみを確認できるミラー。",
             downloadsSummary: "進行中と完了したばかりのダウンロード。",
             scratchpadSummary: "自動で保存されるクイックメモ。",
-            agentsSummary: "Claude CodeとCodexの使用量、上限、コスト。"
+            agentsSummary: "Claude Code、Codex、OpenCodeの使用量、上限、コスト。",
+            watchSummary: "ウインドウの好きな部分をライブで読み取り、変化したら知らせます。"
         )
         case .ko: return NotchEditorStrings(
             layout: "레이아웃",
@@ -731,6 +765,8 @@ extension FeatureStrings {
             privacy: "개인정보 보호",
             reopening: "다시 열 때",
             lastPage: "마지막 페이지",
+            openActivity: "표시 중인 활동 열기",
+            openActivityHint: "닫힌 섬에 음악, 타이머 등 활동이 표시되면 대신 해당 활동의 페이지로 열립니다.",
             activationTime: "활성화 시간",
             activationTimeHint: "이 시간 동안 섬 위에 포인터를 두면 열립니다.",
             activationTimeFormat: "%.2f초",
@@ -740,7 +776,7 @@ extension FeatureStrings {
             keyboardLightUnavailable: "이 Mac에서는 키보드 백라이트를 제어할 수 없습니다.",
             appPanelHint: "어느 화면에서든 메뉴 막대의 Vorssaint 아이콘을 클릭할 때 패널이 열릴 위치를 선택하세요.",
             hideMenuBarIcon: "메뉴 막대 아이콘 숨기기",
-            hideMenuBarIconHint: "설정과 앱 패널은 Dynamic Island에서 열 수 있습니다. Dynamic Island를 끄거나 알릴 내용이 있을 때(업데이트 준비 완료 또는 마이크 음소거) 아이콘이 자동으로 돌아옵니다.",
+            hideMenuBarIconHint: "설정과 앱 패널은 Dynamic Island에서 열 수 있습니다. Dynamic Island를 끄거나 전체 화면에서 숨기거나, 업데이트가 준비되거나 마이크를 음소거하면 아이콘이 다시 나타납니다.",
             sections: "섹션",
             sectionsHint: "드래그하여 순서를 바꾸세요. 체크를 해제하면 섬에서 숨겨집니다.",
             preview: "미리보기",
@@ -762,7 +798,8 @@ extension FeatureStrings {
             cameraSummary: "통화 전에 모습을 확인하는 거울.",
             downloadsSummary: "진행 중이거나 방금 끝난 다운로드.",
             scratchpadSummary: "저절로 저장되는 빠른 메모.",
-            agentsSummary: "Claude Code와 Codex의 사용량, 한도, 비용."
+            agentsSummary: "Claude Code, Codex, OpenCode의 사용량, 한도, 비용.",
+            watchSummary: "윈도우의 원하는 부분을 실시간으로 읽고 바뀌면 알려 줍니다."
         )
         case .zhHans: return NotchEditorStrings(
             layout: "布局",
@@ -792,6 +829,8 @@ extension FeatureStrings {
             privacy: "隐私",
             reopening: "重新打开时",
             lastPage: "上次的页面",
+            openActivity: "打开显示中的活动",
+            openActivityHint: "收起的岛显示音乐、计时器或其他活动时，会改为在该活动的页面打开。",
             activationTime: "激活时间",
             activationTimeHint: "将指针在岛上停留此时长即可打开。",
             activationTimeFormat: "%.2f 秒",
@@ -801,7 +840,7 @@ extension FeatureStrings {
             keyboardLightUnavailable: "此 Mac 无法控制键盘背光。",
             appPanelHint: "选择在任意显示器上点击菜单栏的 Vorssaint 图标时打开面板的位置。",
             hideMenuBarIcon: "隐藏菜单栏图标",
-            hideMenuBarIconHint: "设置和应用面板可从 Dynamic Island 打开。关闭 Dynamic Island，或有需要提示的内容（更新就绪或麦克风已静音）时，图标会自动回来。",
+            hideMenuBarIconHint: "设置和应用面板可从 Dynamic Island 打开。关闭 Dynamic Island、在全屏模式下隐藏它，或有更新就绪或麦克风静音时，图标会自动回来。",
             sections: "分区",
             sectionsHint: "拖动以排序。取消勾选某个分区即可在岛上隐藏它。",
             preview: "预览",
@@ -823,7 +862,8 @@ extension FeatureStrings {
             cameraSummary: "通话前照一照的镜子。",
             downloadsSummary: "进行中和刚完成的下载。",
             scratchpadSummary: "自动保存的快速笔记。",
-            agentsSummary: "Claude Code 和 Codex 的用量、限额和费用。"
+            agentsSummary: "Claude Code、Codex 和 OpenCode 的用量、限额和费用。",
+            watchSummary: "实时读取窗口的任意部分，变化时提醒你。"
         )
         case .zhTW: return NotchEditorStrings(
             layout: "佈局",
@@ -853,6 +893,8 @@ extension FeatureStrings {
             privacy: "隱私",
             reopening: "重新開啟時",
             lastPage: "上次的頁面",
+            openActivity: "開啟顯示中的活動",
+            openActivityHint: "收合的島顯示音樂、計時器或其他活動時，會改為在該活動的頁面開啟。",
             activationTime: "啟用時間",
             activationTimeHint: "將指標停留在島上達此時間即可開啟。",
             activationTimeFormat: "%.2f 秒",
@@ -862,7 +904,7 @@ extension FeatureStrings {
             keyboardLightUnavailable: "此 Mac 無法控制鍵盤背光。",
             appPanelHint: "選擇在任何螢幕上按一下選單列的 Vorssaint 圖像時開啟面板的位置。",
             hideMenuBarIcon: "隱藏選單列圖示",
-            hideMenuBarIconHint: "設定和 App 面板可從 Dynamic Island 開啟。關閉 Dynamic Island，或有需要提示的內容（更新就緒或麥克風已靜音）時，圖示會自動回來。",
+            hideMenuBarIconHint: "設定和 App 面板可從 Dynamic Island 開啟。關閉 Dynamic Island、在全螢幕模式下隱藏它，或有更新就緒或麥克風靜音時，圖示會自動回來。",
             sections: "區域",
             sectionsHint: "拖移以排序。取消勾選某個區域即可在島上隱藏它。",
             preview: "預覽",
@@ -884,7 +926,8 @@ extension FeatureStrings {
             cameraSummary: "通話前照一照的鏡子。",
             downloadsSummary: "進行中和剛完成的下載。",
             scratchpadSummary: "自動儲存的快速筆記。",
-            agentsSummary: "Claude Code 和 Codex 的用量、限額和費用。"
+            agentsSummary: "Claude Code、Codex 和 OpenCode 的用量、限額和費用。",
+            watchSummary: "即時讀取視窗的任何部分，變化時提醒你。"
         )
         case .zhHK: return NotchEditorStrings(
             layout: "佈局",
@@ -914,6 +957,8 @@ extension FeatureStrings {
             privacy: "私隱",
             reopening: "重新開啟時",
             lastPage: "上次的頁面",
+            openActivity: "開啟顯示中的活動",
+            openActivityHint: "收合的島顯示音樂、計時器或其他活動時，會改為在該活動的頁面開啟。",
             activationTime: "啟用時間",
             activationTimeHint: "將指標停留在島上達此時間即可開啟。",
             activationTimeFormat: "%.2f 秒",
@@ -923,7 +968,7 @@ extension FeatureStrings {
             keyboardLightUnavailable: "此 Mac 無法控制鍵盤背光。",
             appPanelHint: "選擇在任何螢幕上按一下選單列的 Vorssaint 圖像時開啟面板的位置。",
             hideMenuBarIcon: "隱藏選單列圖示",
-            hideMenuBarIconHint: "設定和 App 面板可從 Dynamic Island 開啟。關閉 Dynamic Island，或有需要提示的內容（更新就緒或麥克風已靜音）時，圖示會自動回來。",
+            hideMenuBarIconHint: "設定和 App 面板可從 Dynamic Island 開啟。關閉 Dynamic Island、在全螢幕模式下隱藏它，或有更新就緒或麥克風靜音時，圖示會自動回來。",
             sections: "區域",
             sectionsHint: "拖移以排序。取消勾選某個區域即可在島上隱藏它。",
             preview: "預覽",
@@ -945,7 +990,8 @@ extension FeatureStrings {
             cameraSummary: "通話前照一照的鏡子。",
             downloadsSummary: "進行中和剛完成的下載。",
             scratchpadSummary: "自動儲存的快速筆記。",
-            agentsSummary: "Claude Code 和 Codex 的用量、限額和費用。"
+            agentsSummary: "Claude Code、Codex 和 OpenCode 的用量、限額和費用。",
+            watchSummary: "即時讀取視窗的任何部分，變化時提醒你。"
         )
         case .uk: return NotchEditorStrings(
             layout: "Розкладка",
@@ -975,6 +1021,8 @@ extension FeatureStrings {
             privacy: "Приватність",
             reopening: "При повторному відкритті",
             lastPage: "Остання сторінка",
+            openActivity: "Відкривати видиму активність",
+            openActivityHint: "Коли закритий острівець показує музику, таймер або іншу активність, він відкривається на сторінці цієї активності.",
             activationTime: "Час активації",
             activationTimeHint: "Тримайте вказівник над острівцем стільки часу, щоб відкрити його.",
             activationTimeFormat: "%.2f с",
@@ -984,7 +1032,7 @@ extension FeatureStrings {
             keyboardLightUnavailable: "Керування підсвічуванням клавіатури недоступне на цьому Mac.",
             appPanelHint: "Виберіть, де на будь-якому дисплеї відкриватиметься панель програми після натискання значка Vorssaint на смузі меню.",
             hideMenuBarIcon: "Ховати значок на смузі меню",
-            hideMenuBarIconHint: "Налаштування й панель програми відкриваються з Dynamic Island. Значок повертається сам, коли Dynamic Island вимкнено, а також коли є що повідомити (готове оновлення або вимкнений мікрофон).",
+            hideMenuBarIconHint: "Налаштування й панель програми відкриваються з Dynamic Island. Значок повертається, коли Dynamic Island вимкнено або приховано в повноекранному режимі, а також коли готове оновлення чи вимкнено мікрофон.",
             sections: "Розділи",
             sectionsHint: "Перетягуйте, щоб змінити порядок. Зніміть позначку з розділу, щоб сховати його з острівця.",
             preview: "Попередній перегляд",
@@ -1006,7 +1054,8 @@ extension FeatureStrings {
             cameraSummary: "Дзеркало, щоб перевірити себе перед викликом.",
             downloadsSummary: "Завантаження, що тривають або щойно завершилися.",
             scratchpadSummary: "Швидкі нотатки, що зберігаються автоматично.",
-            agentsSummary: "Використання Claude Code і Codex, ліміти й витрати."
+            agentsSummary: "Використання Claude Code, Codex і OpenCode, ліміти й витрати.",
+            watchSummary: "Будь-яка частина вікна, яку читають наживо, зі сповіщенням про зміни."
         )
         }
     }

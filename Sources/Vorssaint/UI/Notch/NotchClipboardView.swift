@@ -7,7 +7,7 @@ import SwiftUI
 /// and the quick panel offer on each: paste or copy, pin, move, delete, and
 /// the recent ones cleared in one go from the search row.
 struct NotchClipboardView: View {
-    let service: NotchService
+    @ObservedObject var service: NotchService
     let size: CGSize
     @ObservedObject private var history = ClipboardHistoryService.shared
     @ObservedObject private var l10n = L10n.shared
@@ -30,6 +30,16 @@ struct NotchClipboardView: View {
 
     /// Moving swaps neighbours in the list, which a search would misreport.
     private var canReorder: Bool { query.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty }
+
+    private var searchTokens: [String] {
+        ClipboardHistorySearch.searchTokens(for: query)
+    }
+
+    /// The island draws its text in white and never in the accent color, so a
+    /// match stands out by weight alone.
+    private func searchText(_ string: String, matching tokens: [String]) -> Text {
+        SearchHighlightText.text(string, tokens: tokens, fontSize: 12, highlightColor: nil)
+    }
 
     var body: some View {
         VStack(spacing: NotchLayout.rowSpacing) {
@@ -88,8 +98,8 @@ struct NotchClipboardView: View {
                 ScrollViewReader { proxy in
                     ScrollView {
                         LazyVStack(spacing: 8) {
-                            ForEach(entries) { entry in
-                                card(entry).frame(height: NotchLayout.clipboardCardHeight)
+                            ForEach(Array(entries.enumerated()), id: \.element.id) { index, entry in
+                                card(entry, place: index).frame(height: NotchLayout.clipboardCardHeight)
                                     .id(entry.id)
                             }
                         }
@@ -108,6 +118,14 @@ struct NotchClipboardView: View {
         .onChange(of: query) { _, _ in highlightedID = searchHighlight(keeping: nil) }
         .onChange(of: pinnedOnly) { _, _ in highlightedID = searchHighlight(keeping: nil) }
         .onChange(of: entries.map(\.id)) { _, _ in highlightedID = searchHighlight(keeping: highlightedID) }
+        .onChange(of: service.clipboardPastePress) { _, press in
+            guard let press, !preview else { return }
+            guard entries.indices.contains(press.index) else {
+                NSSound.beep()
+                return
+            }
+            activate(entries[press.index])
+        }
         .task(id: copiedID) {
             // The tick confirms one copy; leaving it on the row forever would
             // read as a permanent state instead of an answer.
@@ -119,7 +137,7 @@ struct NotchClipboardView: View {
     }
 
     /// The entry fills the card; its actions sit in the bottom row.
-    private func card(_ entry: ClipboardHistoryEntry) -> some View {
+    private func card(_ entry: ClipboardHistoryEntry, place: Int) -> some View {
         VStack(alignment: .leading, spacing: 6) {
             Button { activate(entry) } label: {
                 preview(entry)
@@ -135,6 +153,12 @@ struct NotchClipboardView: View {
                 Text(entry.copiedAt, style: .time)
                     .font(.system(size: 9.5)).foregroundStyle(.tertiary).lineLimit(1)
                 Spacer(minLength: 0)
+                if place < 9, service.panelIsKey {
+                    Text("⌘\(place + 1)")
+                        .font(.system(size: 9.5, weight: .medium)).monospacedDigit()
+                        .foregroundStyle(.tertiary)
+                        .accessibilityHidden(true)
+                }
                 if entry.kind == .image, AppFeature.screenshot.isAvailable {
                     NotchIconButton(symbol: "pencil", title: text.edit) { history.editImage(entry) }
                 }
@@ -192,7 +216,8 @@ struct NotchClipboardView: View {
             highlightedID = NotchSupport.steppedItem(from: highlightedID, in: ids, backwards: keyCode == 126)
             return true
         case 36, 76:
-            guard let id = highlightedID, let entry = entries.first(where: { $0.id == id }) else { return false }
+            guard let id = NotchSupport.clipboardPasteTarget(highlighted: highlightedID, in: ids),
+                  let entry = entries.first(where: { $0.id == id }) else { return false }
             activate(entry)
             return true
         default:
@@ -240,7 +265,7 @@ struct NotchClipboardView: View {
                     .clipShape(RoundedRectangle(cornerRadius: 6))
                     .help("\(text.imageEntryLabel) · \(entry.imageDimensionsLabel)")
             } else {
-                Text("\(text.imageEntryLabel) · \(entry.imageDimensionsLabel)")
+                searchText("\(text.imageEntryLabel) · \(entry.imageDimensionsLabel)", matching: searchTokens)
                     .font(.system(size: 12))
                     .frame(maxWidth: .infinity, alignment: .topLeading)
             }
@@ -255,23 +280,28 @@ struct NotchClipboardView: View {
                     .clipShape(RoundedRectangle(cornerRadius: 6))
                     .help(path)
             } else {
-                Label(entry.filePaths.count == 1
-                      ? (entry.fileNames.first ?? entry.preview)
-                      : String(format: text.fileCountFormat, entry.filePaths.count),
-                      systemImage: "folder")
-                    .font(.system(size: 12))
-                    .lineLimit(2)
-                    .truncationMode(.middle)
-                    .frame(maxWidth: .infinity, alignment: .topLeading)
-                    .help(entry.filePaths.joined(separator: "\n"))
+                // A count of several files is no text the search reads.
+                Label {
+                    searchText(entry.filePaths.count == 1
+                                   ? (entry.fileNames.first ?? entry.preview)
+                                   : String(format: text.fileCountFormat, entry.filePaths.count),
+                               matching: entry.filePaths.count == 1 ? searchTokens : [])
+                } icon: {
+                    Image(systemName: "folder")
+                }
+                .font(.system(size: 12))
+                .lineLimit(2)
+                .truncationMode(.middle)
+                .frame(maxWidth: .infinity, alignment: .topLeading)
+                .help(entry.filePaths.joined(separator: "\n"))
             }
         case .text:
             HStack(alignment: .firstTextBaseline, spacing: 7) {
                 if let color = entry.color {
-                    ClipboardColorSwatch(color: color, size: 12)
+                    ColorSwatch(color: color, size: 12)
                         .alignmentGuide(.firstTextBaseline) { $0[.bottom] - 1 }
                 }
-                Text(entry.preview)
+                searchText(entry.preview, matching: searchTokens)
                     .font(.system(size: 12))
                     .lineLimit(3)
                     .multilineTextAlignment(.leading)

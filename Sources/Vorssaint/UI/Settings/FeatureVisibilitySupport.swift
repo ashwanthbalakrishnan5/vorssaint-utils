@@ -27,6 +27,7 @@ enum SettingsSectionAnchor: String, CaseIterable, Hashable {
     case scrollDirection
     case focusFollowsMouse
     case smoothScroll
+    case linearScroll
     case mouseAcceleration
     case mouseNavigation
     case mouseButtonShortcuts
@@ -61,7 +62,7 @@ enum SettingsSectionAnchor: String, CaseIterable, Hashable {
              .soundOutputSwitcher:
             return .general
         case .keepAwake, .brightness, .extraBrightness, .bluetoothSleep: return .energy
-        case .scrollDirection, .focusFollowsMouse, .smoothScroll, .mouseAcceleration, .mouseNavigation, .mouseButtonShortcuts,
+        case .scrollDirection, .focusFollowsMouse, .smoothScroll, .linearScroll, .mouseAcceleration, .mouseNavigation, .mouseButtonShortcuts,
              .middleClick, .mouseClickDebounce:
             return .mouse
         case .switcher: return .switcher
@@ -155,21 +156,38 @@ final class SettingsRouter: ObservableObject {
 
     init() {}
 
+    /// `replacingVisit` swaps what the current visit shows without adding a
+    /// history entry, for a fallback when the visited tool went away.
     func request(_ destination: FeatureSettingsDestination, targetFeature: AppFeature? = nil,
-                 sidebarFeature: AppFeature? = nil) {
+                 sidebarFeature: AppFeature? = nil, replacingVisit: Bool = false) {
         let requestID = UUID()
+        let samePage = page == destination.page
         page = destination.page
         self.destination = destination
         self.sidebarFeature = sidebarFeature?.settingsDestination == destination ? sidebarFeature : nil
-        // Section requests refine the current page visit, not a new history entry.
-        history[historyIndex] = HistoryEntry(destination: destination,
-                                             sidebarFeature: self.sidebarFeature)
+        let entry = HistoryEntry(destination: destination, sidebarFeature: self.sidebarFeature)
+        // Section requests refine the current page visit, not a new history
+        // entry. General and Energy show one tool per anchor, so switching
+        // tools there is a visit of its own.
+        if samePage && !isTraversingHistory && !replacingVisit
+            && Self.anchorSelectsTool(on: destination.page)
+            && history[historyIndex].destination != destination {
+            history.removeSubrange((historyIndex + 1)..<history.count)
+            history.append(entry)
+            historyIndex += 1
+        } else {
+            history[historyIndex] = entry
+        }
         pendingDestinationRequest = SettingsDestinationRequest(id: requestID,
                                                                destination: destination)
         pendingFeatureTarget = targetFeature.map {
             SettingsFeatureTargetRequest(id: requestID, feature: $0)
         }
         self.requestID = requestID
+    }
+
+    private static func anchorSelectsTool(on page: SettingsPage) -> Bool {
+        page == .general || page == .energy
     }
 
     func goBack(isPageVisible: (SettingsPage) -> Bool = { _ in true }) {
@@ -251,6 +269,8 @@ extension AppFeature {
             return FeatureSettingsDestination(.mouse, sectionAnchor: .focusFollowsMouse)
         case .smoothScroll:
             return FeatureSettingsDestination(.mouse, sectionAnchor: .smoothScroll)
+        case .linearScroll:
+            return FeatureSettingsDestination(.mouse, sectionAnchor: .linearScroll)
         case .mouseAcceleration:
             return FeatureSettingsDestination(.mouse, sectionAnchor: .mouseAcceleration)
         case .mouseNavigation:
@@ -320,7 +340,7 @@ extension AppFeature {
             return FeatureSettingsDestination(.quickTools, sectionAnchor: .cameraPreview)
         case .wallpaper:
             return FeatureSettingsDestination(.quickTools, sectionAnchor: .wallpaper)
-        case .notch, .notchCalendar, .notchNotifications, .notchGestures, .notchTimer, .notchAccessories, .notchLyrics, .notchQueue, .notchLiveEqualizer, .notchDownloads, .notchAgents: return FeatureSettingsDestination(.notch)
+        case .notch, .notchCalendar, .notchNotifications, .notchGestures, .notchTimer, .notchAccessories, .notchLyrics, .notchQueue, .notchLiveEqualizer, .notchDownloads, .notchAgents, .notchWatch: return FeatureSettingsDestination(.notch)
         case .radialMenu: return FeatureSettingsDestination(.radialMenu)
         case .scratchpad:
             return FeatureSettingsDestination(.quickTools, sectionAnchor: .scratchpad)
@@ -350,7 +370,7 @@ enum FeatureVisibilitySupport {
         switch page {
         case .energy: return [.keepAwake, .brightness, .extraBrightness, .bluetoothSleep]
         case .monitor: return monitorFeatures
-        case .mouse: return [.scrollInverter, .scrollHorizontal, .focusFollowsMouse, .smoothScroll, .mouseAcceleration, .mouseNavigation, .mouseButtonShortcuts,
+        case .mouse: return [.scrollInverter, .scrollHorizontal, .focusFollowsMouse, .smoothScroll, .linearScroll, .mouseAcceleration, .mouseNavigation, .mouseButtonShortcuts,
                              .middleClick, .mouseClickDebounce]
         case .switcher: return [.switcher]
         case .dock: return [.dockPreview, .dockClick]
@@ -374,7 +394,7 @@ enum FeatureVisibilitySupport {
         case .superKey: return [.superKey]
         case .textSnippets: return [.textSnippets]
         case .screenshot: return [.screenshot, .screenRecorder, .screenOCR, .colorPicker]
-        case .notch: return [.notch, .notchCalendar, .notchNotifications, .notchGestures, .notchTimer, .notchAccessories, .notchLyrics, .notchQueue, .notchLiveEqualizer, .notchDownloads, .notchAgents]
+        case .notch: return [.notch, .notchCalendar, .notchNotifications, .notchGestures, .notchTimer, .notchAccessories, .notchLyrics, .notchQueue, .notchLiveEqualizer, .notchDownloads, .notchAgents, .notchWatch]
         case .radialMenu: return [.radialMenu]
         case .commandBar: return [.commandBar]
         case .general, .features, .shortcuts, .advanced, .about, .releaseNotes, .support:

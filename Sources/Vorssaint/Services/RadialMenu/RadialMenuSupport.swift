@@ -564,7 +564,9 @@ enum RadialNowPlayingSupport {
             if let value = fields[key] as? NSNumber { info[key] = value }
         }
         if fields["artworkUnchanged"] as? Bool == true { info["artworkUnchanged"] = true }
-        if let canSeek = fields["canSeek"] as? Bool { info["canSeek"] = canSeek }
+        for key in ["canSeek", "canSkipNext", "canSkipPrevious"] {
+            if let value = fields[key] as? Bool { info[key] = value }
+        }
         if let identifier = fields["itemIdentifier"] as? String, !identifier.isEmpty,
            identifier.utf8.count <= 512, !identifier.contains("\0") { info["itemIdentifier"] = identifier }
         if let artwork = fields["artworkBase64"] as? String,
@@ -850,6 +852,21 @@ enum RadialMenuSupport {
             preset: RadialMenuProfilePreset.general.rawValue
         )
         return [initialProfile]
+    }
+
+    /// The combinations the wheels answer to, read the way `RadialMenuService`
+    /// registers them. Before any profile is saved that is the shortcut the
+    /// first wheel migrates from, and a wheel without one claims nothing.
+    static func profileShortcuts(defaults: UserDefaults = .standard) -> [GlobalShortcut] {
+        decodeProfiles(defaults.data(forKey: DefaultsKey.radialMenuProfiles), defaults: defaults)
+            .compactMap { GlobalShortcut(storageValue: $0.shortcut) }
+    }
+
+    /// The other wheel that already opens on a combination. Two wheels on one
+    /// combination would leave one of them dead, so Settings refuses the second.
+    static func profile(using shortcut: GlobalShortcut, in profiles: [RadialMenuProfile],
+                        excluding profileID: UUID) -> RadialMenuProfile? {
+        profiles.first { $0.id != profileID && GlobalShortcut(storageValue: $0.shortcut) == shortcut }
     }
 
     static func encodeProfiles(_ profiles: [RadialMenuProfile]) -> Data? {

@@ -15,6 +15,8 @@ struct MixerSection: View {
     @ObservedObject private var inputManager = AudioInputDeviceManager.shared
     @ObservedObject private var audioPriority = AudioPriorityService.shared
     @ObservedObject private var micMute = MicMuteService.shared
+    @AppStorage(DefaultsKey.liquidGlassEnabled) private var windowsGlass = false
+    @AppStorage(DefaultsKey.notchLiquidGlassEnabled) private var islandGlass = false
     @AppStorage(DefaultsKey.mixerAppArrangement)
     private var arrangementValue = ""
     @AppStorage(DefaultsKey.mixerHideInactiveApps)
@@ -28,6 +30,10 @@ struct MixerSection: View {
     @State private var dropTarget: MixerAppDropTarget?
     var collapsible = true
     var settingsMode = false
+
+    private var glassEnabled: Bool {
+        LiquidGlassSupport.isEnabled(inNotch: inNotch, windows: windowsGlass, island: islandGlass)
+    }
 
     var body: some View {
         Group {
@@ -47,6 +53,7 @@ struct MixerSection: View {
         .onReceive(NotificationCenter.default.publisher(for: Notification.Name("NSSystemColorsDidChangeNotification"))) { _ in
             refreshSliderTint()
         }
+        .onAppear { mixer.refreshApps() }
     }
 
     private var mixerControls: some View {
@@ -163,6 +170,7 @@ struct MixerSection: View {
                                       boostTint: normalSliderTint,
                                       isBoosting: false,
                                       accentRevision: accentRevision,
+                                      glassEnabled: glassEnabled,
                                       maximum: 1,
                                       accessibilityLabel: l10n.s.mixerSystemOutputTitle)
 
@@ -328,6 +336,7 @@ struct MixerSection: View {
                                       boostTint: normalSliderTint,
                                       isBoosting: false,
                                       accentRevision: accentRevision,
+                                      glassEnabled: glassEnabled,
                                       maximum: 1,
                                       accessibilityLabel: l10n.s.mixerInputTitle)
 
@@ -423,7 +432,7 @@ struct MixerSection: View {
     @ViewBuilder
     private var mixerRows: some View {
 #if compiler(>=6.2)
-        if #available(macOS 26.0, *), LiquidGlassSupport.isEnabled() {
+        if #available(macOS 26.0, *), glassEnabled {
             GlassEffectContainer(spacing: 8) {
                 rowList
             }
@@ -441,6 +450,7 @@ struct MixerSection: View {
             MixerRow(app: app,
                      normalTint: normalSliderTint,
                      accentRevision: accentRevision,
+                     glassEnabled: glassEnabled,
                      editingVolumeID: $editingVolumeID,
                      isPinned: arrangement.isPinned(app.persistenceID),
                      togglePin: { updateArrangement { $0.togglePin(app.persistenceID ?? "") } },
@@ -875,6 +885,7 @@ private struct MixerRow: View {
     let app: MixerApp
     let normalTint: Color
     let accentRevision: Int
+    let glassEnabled: Bool
     @Binding var editingVolumeID: String?
     let isPinned: Bool
     let togglePin: () -> Void
@@ -956,6 +967,7 @@ private struct MixerRow: View {
                                           boostTint: boostColor,
                                           isBoosting: isBoosting,
                                           accentRevision: accentRevision,
+                                          glassEnabled: glassEnabled,
                                           maximum: AppVolumeMixer.maxVolume,
                                           accessibilityLabel: app.name)
 
@@ -1053,9 +1065,17 @@ private struct MixerRow: View {
                 Text(outputDeviceTitle(device))
                     .tag(device.uid)
             }
-            if let selected = app.selectedOutputDeviceUID, app.outputDeviceUnavailable {
+            if let selected = app.selectedOutputDeviceUID,
+               MixerRoutingSupport.needsUnavailableOutputRow(selectedUID: selected,
+                                                             isUnavailable: app.outputDeviceUnavailable,
+                                                             listedUIDs: mixer.outputDevices.map(\.uid)) {
                 Text(l10n.s.mixerOutputUnavailable)
                     .tag(selected)
+            }
+            if mixer.outputDevices.contains(where: { MixerRoutingSupport.isAirPlaySentinel($0.uid) }) {
+                Divider()
+                Text(l10n.s.mixerAirPlayChooseSpeaker)
+                    .tag(MixerRoutingSupport.airPlaySpeakerChoiceID)
             }
         }
         .labelsHidden()
@@ -1182,6 +1202,7 @@ private struct AutofocusingVolumeTextField: NSViewRepresentable {
     func makeNSView(context: Context) -> MixerPercentNativeTextField {
         let field = MixerPercentNativeTextField()
         field.delegate = context.coordinator
+        context.coordinator.field = field
         field.isBordered = false
         field.drawsBackground = false
         field.focusRingType = .none
@@ -1220,6 +1241,7 @@ private struct AutofocusingVolumeTextField: NSViewRepresentable {
         private var isActive: Bool
         var onSubmit: () -> Bool
         var onCancel: () -> Void
+        weak var field: MixerPercentNativeTextField?
         private var didFocus = false
         private var isFinishing = false
         private var escapeMonitor: Any?
@@ -1293,7 +1315,13 @@ private struct AutofocusingVolumeTextField: NSViewRepresentable {
         private func startMonitoringEscape() {
             guard escapeMonitor == nil else { return }
             escapeMonitor = NSEvent.addLocalMonitorForEvents(matching: .keyDown) { [weak self] event in
-                guard let self, self.isActive, event.keyCode == 53 else { return event }
+                // The monitor sees the whole app; Escape in another window,
+                // such as Settings, stays there.
+                guard let self, self.isActive, event.keyCode == 53,
+                      let window = self.field?.window, event.window === window else { return event }
+                // While an input method is composing, Esc belongs to it and
+                // drops the candidate; the next one cancels the level.
+                if (window.firstResponder as? NSTextView)?.hasMarkedText() == true { return event }
                 self.finish(self.onCancel)
                 return nil
             }
@@ -1319,6 +1347,7 @@ private struct MixerVolumeSlider: View {
     let boostTint: Color
     let isBoosting: Bool
     let accentRevision: Int
+    let glassEnabled: Bool
     let maximum: Double
     let accessibilityLabel: String
 
@@ -1328,7 +1357,7 @@ private struct MixerVolumeSlider: View {
     var body: some View {
         Group {
 #if compiler(>=6.2)
-            if #available(macOS 26.0, *), LiquidGlassSupport.isEnabled() {
+            if #available(macOS 26.0, *), glassEnabled {
                 LiquidGlassMixerSlider(value: $value,
                                        tint: activeTint,
                                        isBoosting: isBoosting,

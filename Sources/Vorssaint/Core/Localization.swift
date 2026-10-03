@@ -112,7 +112,22 @@ final class L10n: ObservableObject {
         didSet { UserDefaults.standard.set(language.rawValue, forKey: DefaultsKey.language) }
     }
 
-    var s: Strings {
+    var s: Strings { Strings.localized(language) }
+
+    private init() {
+        if let raw = UserDefaults.standard.string(forKey: DefaultsKey.language),
+           let saved = AppLanguage(rawValue: raw) {
+            language = saved
+        } else {
+            language = .systemDefault
+        }
+    }
+}
+
+extension Strings {
+    /// The catalog for a language other than the current one, as the
+    /// feature string tables offer theirs.
+    static func localized(_ language: AppLanguage) -> Strings {
         switch language {
         case .enUS: return .enUS
         case .ptBR: return .ptBR
@@ -129,15 +144,6 @@ final class L10n: ObservableObject {
         case .zhHK: return .zhHK
         case .zhTW: return .zhTW
         case .uk: return .uk
-        }
-    }
-
-    private init() {
-        if let raw = UserDefaults.standard.string(forKey: DefaultsKey.language),
-           let saved = AppLanguage(rawValue: raw) {
-            language = saved
-        } else {
-            language = .systemDefault
         }
     }
 }
@@ -389,6 +395,8 @@ struct Strings {
     let switcherTakeOverSystemShortcutsCaption: String
     let switcherAppearanceDelay: String
     let switcherAppearanceDelayCaption: String
+    let switcherInstantSelection: String
+    let switcherInstantSelectionCaption: String
     let switcherMergeTabs: String
     let switcherMergeTabsCaption: String
     let switcherWindowlessApps: String
@@ -404,6 +412,7 @@ struct Strings {
     let dockPreviewCurrentSpaceOnlyCaption: String
     let dockPreviewBackgroundOpacity: String
     let dockPreviewBackgroundOpacityCaption: String
+    let dockPreviewBackgroundOpacityGlassCaption: String
     let dockPreviewOpenDelay: String
     let dockPreviewOpenDelayCaption: String
     let dockPreviewQuitAppOnClose: String
@@ -461,6 +470,7 @@ struct Strings {
     let autoQuitStep1: String
     let autoQuitStep2: String
     let autoQuitPredictableNote: String
+    let autoQuitOngoingWorkNote: String
     let autoQuitExceptionsTitle: String
     let autoQuitExceptionsCaption: String
     let autoQuitExceptionsEmpty: String
@@ -556,6 +566,7 @@ struct Strings {
     let homebrewCasks: String
     let homebrewNoPackages: String
     let homebrewDependencies: String
+    let homebrewGroupDependencies: String
     let homebrewNoSelection: String
     let homebrewDetailsTitle: String
     let homebrewInstall: String
@@ -763,6 +774,7 @@ struct Strings {
     let mixerOutputFallback: String
     let mixerBypassedCaption: String
     let mixerOutputTooltip: String
+    let mixerAirPlayChooseSpeaker: String
     let mixerSystemOutputTitle: String
     let mixerSystemOutputNoDevices: String
     let mixerSystemOutputTooltip: String
@@ -1132,6 +1144,7 @@ struct Strings {
     let musicBlockReplacementNone: String
     let musicBlockReplacementBlocked: String
     let musicBlockChooseApp: String
+    let musicBlockPlayReplacement: String
 
     // MARK: Cleaner
     let cleanerName: String
@@ -1252,7 +1265,10 @@ struct Strings {
     let focusFollowsMouseName: String
     let focusFollowsMouseCaption: String
     let focusFollowsMouseDelay: String
+    let focusFollowsMouseRaise: String
+    let focusFollowsMouseWaitForStop: String
     let switcherMinimizedPlacementLabel: String
+    let switcherTreatHiddenAppsLikeMinimized: String
     let switcherMinimizedPlacementNormal: String
     let switcherMinimizedPlacementEnd: String
     let switcherMinimizedPlacementHidden: String
@@ -1268,8 +1284,13 @@ struct Strings {
     let smoothScrollCoastLabel: String
     let mouseAccelerationName: String
     let mouseAccelerationCaption: String
+    let linearScrollName: String
+    let linearScrollCaption: String
+    let linearScrollLinesLabel: String
     let shelfClearOnClose: String
     let shelfClearOnCloseCaption: String
+    let shelfShortcutFinderSelection: String
+    let shelfShortcutFinderSelectionCaption: String
 }
 
 // MARK: - Português (Brasil)
@@ -1500,6 +1521,8 @@ extension Strings {
         switcherTakeOverSystemShortcutsCaption: "Desativa os atalhos correspondentes de apps e janelas do macOS somente enquanto o alternador do Vorssaint estiver ativo. Todos os apps abertos continuam acessíveis.",
         switcherAppearanceDelay: "Atraso de exibição",
         switcherAppearanceDelayCaption: "Quanto tempo o atalho precisa ficar pressionado antes de o alternador aparecer.",
+        switcherInstantSelection: "Seleção instantânea",
+        switcherInstantSelectionCaption: "Move o destaque e a rolagem imediatamente ao navegar por apps e janelas.",
         switcherMergeTabs: "Mostrar uma entrada por app",
         switcherMergeTabsCaption: "Junta todas as janelas de um app em uma só entrada no alternador, em vez de uma por janela.",
         switcherWindowlessApps: "Apps sem janela aberta",
@@ -1515,6 +1538,7 @@ extension Strings {
         dockPreviewCurrentSpaceOnlyCaption: "Quando desligado, mostra janelas de todas as mesas. Escolher uma janela em outra mesa leva você até ela.",
         dockPreviewBackgroundOpacity: "Fundo do painel",
         dockPreviewBackgroundOpacityCaption: "Diminua para ver mais do que está atrás do painel.",
+        dockPreviewBackgroundOpacityGlassCaption: "Com o Liquid Glass ligado, a transparência do painel é definida em Ajustes do Sistema > Aparência.",
         dockPreviewOpenDelay: "Atraso de abertura",
         dockPreviewOpenDelayCaption: "Quanto tempo o ponteiro precisa ficar sobre um ícone antes de o painel abrir.",
         dockPreviewQuitAppOnClose: "Encerrar o app com o botão ×",
@@ -1570,6 +1594,7 @@ extension Strings {
         autoQuitStep1: "Feche a última janela de um app (⌘W ou o botão vermelho).",
         autoQuitStep2: "O app é encerrado sozinho. Diálogos de “salvar?” continuam aparecendo.",
         autoQuitPredictableNote: "Apps que normalmente rodam sem janela nunca são encerrados.",
+        autoQuitOngoingWorkNote: "Alguns apps fecham a última janela e continuam trabalhando, como um gravador de tela depois que a captura começa. Esses também são encerrados, a menos que estejam na lista de exceções.",
         autoQuitExceptionsTitle: "Exceções",
         autoQuitExceptionsCaption: "Apps nesta lista continuam abertos mesmo sem nenhuma janela.",
         autoQuitExceptionsEmpty: "Nenhuma exceção",
@@ -1662,6 +1687,7 @@ extension Strings {
         homebrewCasks: "Casks",
         homebrewNoPackages: "Nenhum pacote encontrado",
         homebrewDependencies: "Dependências",
+        homebrewGroupDependencies: "Agrupar dependências",
         homebrewNoSelection: "Selecione um pacote instalado ou pesquise um novo.",
         homebrewDetailsTitle: "Detalhes do pacote",
         homebrewInstall: "Instalar",
@@ -1860,6 +1886,7 @@ extension Strings {
         mixerOutputFallback: "Usando o padrão até esse dispositivo voltar.",
         mixerBypassedCaption: "Este app controla o próprio áudio.",
         mixerOutputTooltip: "Escolher saída",
+        mixerAirPlayChooseSpeaker: "Escolher alto-falante AirPlay…",
         mixerSystemOutputTitle: "Saída",
         mixerSystemOutputNoDevices: "Nenhuma saída encontrada",
         mixerSystemOutputTooltip: "Escolher saída do sistema",
@@ -2208,6 +2235,7 @@ extension Strings {
         musicBlockReplacementNone: "Nenhum",
         musicBlockReplacementBlocked: "O Música e o iTunes são os apps bloqueados, então não podem abrir no lugar. Escolha outro app.",
         musicBlockChooseApp: "Escolher app…",
+        musicBlockPlayReplacement: "Reproduzir após abrir o app substituto",
         cleanerName: "Limpeza",
         cleanerIntroTitle: "Limpe o lixo do Mac",
         cleanerIntroCaption: "Procura restos de apps desinstalados, caches, registros e a Lixeira. Você revisa tudo antes e os itens removidos vão para a Lixeira.",
@@ -2324,9 +2352,12 @@ extension Strings {
         shelfEdgeToggle: "Abrir perto de uma borda da tela",
         shelfEdgeCaption: "Ao arrastar um arquivo para perto da borda da tela, a área espia para dentro. Solte ali, ou puxe de volta e ela recua.",
         focusFollowsMouseName: "Foco ao passar o mouse",
-        focusFollowsMouseCaption: "Coloca em foco e traz para frente a janela sob o ponteiro após uma breve pausa.",
+        focusFollowsMouseCaption: "Coloca em foco a janela sob o ponteiro.",
         focusFollowsMouseDelay: "Atraso ao passar o mouse",
-        switcherMinimizedPlacementLabel: "Janelas minimizadas e apps ocultos",
+        focusFollowsMouseRaise: "Trazer a janela para frente",
+        focusFollowsMouseWaitForStop: "Esperar o ponteiro parar",
+        switcherMinimizedPlacementLabel: "Janelas minimizadas",
+        switcherTreatHiddenAppsLikeMinimized: "Tratar apps ocultos como janelas minimizadas",
         switcherMinimizedPlacementNormal: "Ordem normal",
         switcherMinimizedPlacementEnd: "Colocar no final",
         switcherMinimizedPlacementHidden: "Ocultar",
@@ -2342,8 +2373,13 @@ extension Strings {
         smoothScrollCoastLabel: "Inércia",
         mouseAccelerationName: "Desativar aceleração do mouse",
         mouseAccelerationCaption: "Remove a aceleração do cursor para os mouses conectados. A configuração anterior volta ao desligar esta opção ou sair do Vorssaint.",
+        linearScrollName: "Rolagem linear",
+        linearScrollCaption: "Cada passo da rodinha do mouse rola a mesma distância, não importa a velocidade do giro. O trackpad não muda.",
+        linearScrollLinesLabel: "Linhas por passo",
         shelfClearOnClose: "Limpar ao fechar",
-        shelfClearOnCloseCaption: "Esvazia a área somente quando você clica no botão de fechar. Ocultar automaticamente e encolher preservam os itens."
+        shelfClearOnCloseCaption: "Esvazia a área somente quando você clica no botão de fechar. Ocultar automaticamente e encolher preservam os itens.",
+        shelfShortcutFinderSelection: "Adicionar a seleção do Finder com o atalho",
+        shelfShortcutFinderSelectionCaption: "Com o Finder em primeiro plano, o atalho abre a área temporária já com os arquivos selecionados. Sem seleção, ela abre como sempre."
     )
 }
 
@@ -2575,6 +2611,8 @@ extension Strings {
         switcherTakeOverSystemShortcutsCaption: "Disables the matching macOS app and window shortcuts only while Vorssaint’s switcher is active. All running apps stay reachable.",
         switcherAppearanceDelay: "Appearance delay",
         switcherAppearanceDelayCaption: "How long the shortcut must be held before the switcher appears.",
+        switcherInstantSelection: "Instant selection",
+        switcherInstantSelectionCaption: "Moves the highlight and scroll position immediately as you browse apps and windows.",
         switcherMergeTabs: "Show one entry per app",
         switcherMergeTabsCaption: "Collapses all of an app’s windows into one entry in the switcher, instead of one entry per window.",
         switcherWindowlessApps: "Apps with no open window",
@@ -2590,6 +2628,7 @@ extension Strings {
         dockPreviewCurrentSpaceOnlyCaption: "When off, shows windows from all desktops. Choosing a window on another desktop takes you there.",
         dockPreviewBackgroundOpacity: "Panel background",
         dockPreviewBackgroundOpacityCaption: "Turn it down to see more of what sits behind the panel.",
+        dockPreviewBackgroundOpacityGlassCaption: "Liquid Glass is on, so the panel’s transparency is set in System Settings > Appearance.",
         dockPreviewOpenDelay: "Open delay",
         dockPreviewOpenDelayCaption: "How long the pointer has to rest on an icon before its panel opens.",
         dockPreviewQuitAppOnClose: "Quit the app with the × button",
@@ -2645,6 +2684,7 @@ extension Strings {
         autoQuitStep1: "Close an app’s last window (⌘W or the red button).",
         autoQuitStep2: "The app quits on its own. “Save changes?” dialogs still appear.",
         autoQuitPredictableNote: "Apps that normally run without a window are never quit.",
+        autoQuitOngoingWorkNote: "Some apps close their last window while they keep working, such as a screen recorder once capture starts. Those are quit too, unless they are on the Exceptions list.",
         autoQuitExceptionsTitle: "Exceptions",
         autoQuitExceptionsCaption: "Apps on this list stay open even with no windows.",
         autoQuitExceptionsEmpty: "No exceptions",
@@ -2737,6 +2777,7 @@ extension Strings {
         homebrewCasks: "Casks",
         homebrewNoPackages: "No packages found",
         homebrewDependencies: "Dependencies",
+        homebrewGroupDependencies: "Group dependencies",
         homebrewNoSelection: "Select an installed package or search for a new one.",
         homebrewDetailsTitle: "Package details",
         homebrewInstall: "Install",
@@ -2935,6 +2976,7 @@ extension Strings {
         mixerOutputFallback: "Using default until this device returns.",
         mixerBypassedCaption: "This app manages its own audio.",
         mixerOutputTooltip: "Choose output",
+        mixerAirPlayChooseSpeaker: "Choose AirPlay speaker…",
         mixerSystemOutputTitle: "Output",
         mixerSystemOutputNoDevices: "No outputs found",
         mixerSystemOutputTooltip: "Choose system output",
@@ -3283,6 +3325,7 @@ extension Strings {
         musicBlockReplacementNone: "None",
         musicBlockReplacementBlocked: "Music and iTunes are the apps being blocked, so they can’t open instead. Choose another app.",
         musicBlockChooseApp: "Choose app…",
+        musicBlockPlayReplacement: "Play after opening replacement",
         cleanerName: "Cleaner",
         cleanerIntroTitle: "Clean up your Mac",
         cleanerIntroCaption: "Scans for leftovers from uninstalled apps, caches, logs and the Trash. You review everything first and removed items go to the Trash.",
@@ -3399,9 +3442,12 @@ extension Strings {
         shelfEdgeToggle: "Open near a screen edge",
         shelfEdgeCaption: "Drag a file toward the screen edge to peek the shelf in. Drop it there, or pull back and it retreats.",
         focusFollowsMouseName: "Focus follows mouse",
-        focusFollowsMouseCaption: "Focuses and raises the window under the pointer after a short pause.",
+        focusFollowsMouseCaption: "Focuses the window under the pointer.",
         focusFollowsMouseDelay: "Hover delay",
-        switcherMinimizedPlacementLabel: "Minimized windows and hidden apps",
+        focusFollowsMouseRaise: "Bring the window to the front",
+        focusFollowsMouseWaitForStop: "Wait for the pointer to stop",
+        switcherMinimizedPlacementLabel: "Minimized windows",
+        switcherTreatHiddenAppsLikeMinimized: "Treat hidden apps like minimized windows",
         switcherMinimizedPlacementNormal: "Normal ordering",
         switcherMinimizedPlacementEnd: "Place at end",
         switcherMinimizedPlacementHidden: "Hide",
@@ -3417,7 +3463,12 @@ extension Strings {
         smoothScrollCoastLabel: "Coast",
         mouseAccelerationName: "Disable mouse acceleration",
         mouseAccelerationCaption: "Removes pointer acceleration for connected mice. Your previous setting returns when this is turned off or Vorssaint quits.",
+        linearScrollName: "Linear scrolling",
+        linearScrollCaption: "Every notch of the mouse wheel scrolls the same distance, no matter how fast it spins. The trackpad is not affected.",
+        linearScrollLinesLabel: "Lines per step",
         shelfClearOnClose: "Clear when closed",
-        shelfClearOnCloseCaption: "Empties the shelf only when you click its close button. Automatic hiding and collapsing keep the items."
+        shelfClearOnCloseCaption: "Empties the shelf only when you click its close button. Automatic hiding and collapsing keep the items.",
+        shelfShortcutFinderSelection: "Add the Finder selection with the shortcut",
+        shelfShortcutFinderSelectionCaption: "With Finder in front, the shortcut opens the shelf with the selected files already in it. With nothing selected, it opens as usual."
     )
 }
